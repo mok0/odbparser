@@ -1,14 +1,21 @@
-/* $Id: odbparsermodule.c,v 1.3 2005/04/18 10:56:49 mok Exp $ */
+/* 
+   $Id: odbparsermodule.c,v 1.3 2005/04/18 10:56:49 mok Exp $ 
+
+   Python module to read O data files, binary or formatted. 
+   Morten Kjeldgaard, 03-Jan-2001.
+   Licence: GPL.
+*/
+
+
 
 /*
-  Python module to read O data files, binary or formatted. 
 
   XXX: Is it necessary to use INCREF when a new object is created?????
 
 */
 
 #include "Python.h"             /* Python header files */
-#include "Numeric/arrayobject.h"
+#include "arrayobject.h"
 
 //#include <stdio.h>
 //#include <stdlib.h>
