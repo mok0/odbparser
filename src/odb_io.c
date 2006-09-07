@@ -1,4 +1,4 @@
-/* $Id: odb_io.c,v 1.2 2001/01/15 14:13:10 mok Exp $ 
+/* $Id$ 
 
    Routines to read from binary O files.
    Morten Kjeldgaard, 03-Jan-2001.

@@ -1,4 +1,4 @@
-/* $Id: odb_io.h,v 1.1 2001/01/15 14:13:11 mok Exp $ */
+/* $Id$ */
 
 #define SWAP 1
 #define NOSWAP 0
