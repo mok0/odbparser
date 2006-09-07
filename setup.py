@@ -1,10 +1,18 @@
+# -*- mode: python; mode: font-lock; py-indent-offset: 4; -*-
+# $Id$
+
+import os
 from distutils.core import setup, Extension
+from distutils.sysconfig import get_python_lib
+
+incdir = os.path.join(get_python_lib(plat_specific=1), "numpy/core/include/numpy")
 
 module1 = Extension('odbparsermodule',
                     sources = ["src/odbparsermodule.c",
                                "src/odb_io.c",
                                "src/odb_io_f.c",
-                               "src/odb_io.h"],
+                              ],
+                    include_dirs=[incdir]
                     )
 
 setup (name = 'OdbParser',
@@ -14,3 +22,5 @@ setup (name = 'OdbParser',
        author_email = "mok@bioxray.dk",
        ext_modules = [module1])
 
+
+####
