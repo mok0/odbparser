@@ -3,9 +3,9 @@
 
    Python module to read O data files, binary or formatted. 
    Morten Kjeldgaard, 03-Jan-2001.
+   Copyright (C) Morten Kjeldgaard 2001-2006.
    Licence: GPL.
 */
-
 
 
 /*

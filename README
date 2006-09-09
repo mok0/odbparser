@@ -1,1 +1,8 @@
 This is project OdbParser, created on Thu Sep  7 17:08:32 CEST 2006.
+
+To compile and install OdbParser, type the following (as root):
+
+python setup.py build
+python setup.py install
+
+The source files of OdbParser are distributed under the GNU Public License.

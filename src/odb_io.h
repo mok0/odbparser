@@ -1,4 +1,7 @@
-/* $Id$ */
+/* $Id$ 
+   Copyright (C) Morten Kjeldgaard 2001-2006.
+   License: GPL
+*/
 
 #define SWAP 1
 #define NOSWAP 0
