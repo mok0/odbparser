@@ -1,5 +1,5 @@
 /* 
-   $Id$ 
+   $Id: odbparsermodule.c 7 2006-09-09 13:33:21Z mok $ 
 
    Python module to read O data files, binary or formatted. 
    Morten Kjeldgaard, 03-Jan-2001.

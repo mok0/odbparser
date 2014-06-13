@@ -1,4 +1,4 @@
-/* $Id$ 
+/* $Id: odb_io.h 7 2006-09-09 13:33:21Z mok $ 
    Copyright (C) Morten Kjeldgaard 2001-2006.
    License: GPL
 */

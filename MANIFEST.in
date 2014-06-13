@@ -1,0 +1,3 @@
+include COPYING
+include *.html
+recursive-include src *.h

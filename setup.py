@@ -1,5 +1,5 @@
 # -*- mode: python; mode: font-lock; py-indent-offset: 4; -*-
-# $Id$
+# $Id: setup.py 4 2006-09-07 15:54:00Z mok $
 
 import os
 from distutils.core import setup, Extension

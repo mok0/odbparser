@@ -1,4 +1,4 @@
-/* $Id$ 
+/* $Id: odb_io_f.c 7 2006-09-09 13:33:21Z mok $ 
 
    Routines to read from formatted O files.
    Morten Kjeldgaard, 03-Jan-2001.
