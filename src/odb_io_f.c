@@ -47,7 +47,6 @@ getword(fp)
 int read_param_f (FILE *fp, char *par, char *partyp, int *size, char *fmt)
 {
   char buf[256], *ch, *stat;
-  char str[64];
 
     // Get the first non-comment line.
   while (1) {
@@ -288,7 +287,7 @@ int read_c6_f (FILE *fp, char *array, int size, char *fmt)
 */
 int read_text_f (FILE *fp, char *array, int nrec, int size)
 {
-  char *ch, buf[256];
+  char buf[256];
   register int i;
   int j, n;
 
@@ -298,6 +297,7 @@ int read_text_f (FILE *fp, char *array, int nrec, int size)
     strncpy (array+j, buf, size);
     j += size;
   }
+  return j;
 }
 
 /*

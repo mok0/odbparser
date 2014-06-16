@@ -1,5 +1,3 @@
-# -*- mode: python; mode: font-lock; py-indent-offset: 4; -*-
-# $Id: setup.py 4 2006-09-07 15:54:00Z mok $
 
 import os
 from distutils.core import setup, Extension
@@ -8,9 +6,9 @@ from distutils.sysconfig import get_python_lib
 incdir = os.path.join(get_python_lib(plat_specific=1), "numpy/core/include/numpy")
 
 module1 = Extension('odbparsermodule',
-                    sources = ["src/odbparsermodule.c",
-                               "src/odb_io.c",
+                    sources = ["src/odb_io.c",
                                "src/odb_io_f.c",
+                               "src/odbparsermodule.c",
                               ],
                     include_dirs=[incdir]
                     )

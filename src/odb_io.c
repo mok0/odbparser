@@ -1,13 +1,14 @@
-/* $Id: odb_io.c 7 2006-09-09 13:33:21Z mok $ 
-
+/*
    Routines to read from binary O files.
    Morten Kjeldgaard, 03-Jan-2001.
-   Copyright (C) Morten Kjeldgaard 2001-2006.
+   Copyright (C) Morten Kjeldgaard 2001-2014.
    Licence: GPL.
 */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <ctype.h>
 #include "odb_io.h"
 
 /*
@@ -16,7 +17,7 @@
 static void
 swap4 (char *buffer, int n)
 {
-  register i;
+  register int i;
   char j;
 
   for (i=0; i < n*4; i+=4) {
@@ -35,7 +36,6 @@ swap4 (char *buffer, int n)
 int read_param (int fd, char *par, char *partyp, int *size, int swap)
 {
   int n;
-  int j;
   long rl1, rl2;
 
   n = read (fd, &rl1, 4);
@@ -52,8 +52,8 @@ int read_param (int fd, char *par, char *partyp, int *size, int swap)
   if (swap) swap4 ((char *)&rl2, 1);
   
   if (rl1 != rl2) {
-    fprintf (stderr, "Error reading parameter header (%d %d %d)\n", 
-	     size, rl1, rl2);
+    fprintf (stderr, "Error reading parameter header (%d %ld %ld)\n", 
+	     *size, rl1, rl2);
     return -2;
   }
   return 0;
@@ -79,7 +79,7 @@ int read_text (int fd, char *text, int size, int swap)
     return -2;
   }
   if (size != rl2)
-    fprintf (stderr, "read_text: Expected %d, got %d elements\n", size, rl2);
+    fprintf (stderr, "read_text: Expected %d, got %ld elements\n", size, rl2);
 
   return 0;
 }
@@ -104,7 +104,7 @@ int read_c6 (int fd, char *cstore, int size, int swap)
     return -2;
   }
   if (6*size != rl2) 
-    fprintf (stderr, "read_c6: Expected %d, got %d elements\n", 6*size, rl2);
+    fprintf (stderr, "read_c6: Expected %d, got %ld elements\n", 6*size, rl2);
 
   return 0;
 }
@@ -131,7 +131,7 @@ int read_int4 (int fd, int *istore, int size, int swap)
     return -2;
   }
   if (4*size != rl2) 
-    fprintf (stderr, "read_int4: Expected %d, got %d elements\n", 4*size, rl2);
+    fprintf (stderr, "read_int4: Expected %d, got %ld elements\n", 4*size, rl2);
 
   return 0;
 }
@@ -158,7 +158,7 @@ int read_float4 (int fd, float *rstore, int size, int swap)
     return -2;
   }
   if (4*size != rl2)
-    fprintf (stderr, "read_float4: Expected %d, got %d elements\n", 4*size, rl2);
+    fprintf (stderr, "read_float4: Expected %d, got %ld elements\n", 4*size, rl2);
 
   return 0;
 }
