@@ -1,12 +1,16 @@
 <!-- -*- mode: html; mode: font-lock -*- -->
 
-
 <h3>OdbParser -- a Python extension module to read O files</h3>
+<a name="documentation"></a>
 
-The use of the OdbParser module is probably best illustrated by an example.
-First, we import the module, and open up an O data file. This file could
-be both binary and formatted, and it could contain any number of datablocks.
-For this example, we choose a binary file as written by O when it exist:
+OdbParser is a module for the Python programmer who would like to
+extract information from O files.
+
+The use of the OdbParser module is probably best illustrated by an
+example.  First, we import the module, and open up an O data
+file. This file could be both binary and formatted, and it could
+contain any number of datablocks.  For this example, we choose a
+binary file as written by O when it exits:
 
 <pre>
 >>> import odbparser
@@ -14,9 +18,10 @@ For this example, we choose a binary file as written by O when it exist:
 Reading binary O file
 </pre>
 
-Now, after reading the file, db is an ordinary Python dictionary, the keys
-are names of datablocks, and the content of each entry is whatever the type
-of that data is. For example, let us look at a few well-known O datablocks:
+Now, after reading the file, db is an ordinary Python dictionary, the
+keys are names of datablocks, and the content of each entry is
+whatever the type of that data is. For example, let us look at a few
+well-known O datablocks:
 
 <pre>
 >>> type (db[".gs_real"])
@@ -31,10 +36,11 @@ of that data is. For example, let us look at a few well-known O datablocks:
    0.00000000e+00   0.00000000e+00   0.00000000e+00   1.12185276e+00]
 </pre>
 
-We see that the type of the .gs_real array is a <a
-href="http://numpy.scipy.org/">Numpy</a> array, and we can print the array
-to see that it contains the 20 floating point numbers with all kinds of
-viewing information used by O. We can extract the orientation matrix:
+We see that the type of the .gs_real array is
+a <a href="http://numpy.scipy.org/"><b>Numpy</b></a> array, and we can
+print the array to see that it contains 28 floating point numbers with
+all kinds of viewing information used by O. We can extract the
+orientation matrix:
 
 <pre>
 >>> mat = gsreal[4:20]
@@ -46,8 +52,9 @@ viewing information used by O. We can extract the orientation matrix:
  [ -2.66888547  14.67584229  -1.42084014   1.        ]]
 </pre>
 
-Now 'mat' contains the 4x4 orientation matrix in column major format. 
-For most uses, the orientation part (upper 3x3) needs to be transposed:
+Now 'mat' contains the OpenGL 4x4 orientation matrix in column major
+format.  For most uses, the orientation part (upper 3x3) needs to be
+transposed:
 
 <pre>
 >>> mat33 = mat44[0:2,0:2]
@@ -67,8 +74,8 @@ For the translation, we just need to extract that from gsreal:
 </pre>
 
 
-Of course there are other fun things one can do. List all datablocks is
-    one:
+Of course there are other fun things one can do. List all datablocks
+is one:
 
 <pre>
 >>> for k in db.keys():
@@ -82,8 +89,11 @@ Of course there are other fun things one can do. List all datablocks is
 .sam_integer <type 'numpy.ndarray'>
 .map_real <type 'numpy.ndarray'>
 </pre>
+
 ... and so on. Lets try something a bit more interesting. We have a
-molecule named ALPHA in the database:
+molecule named ALPHA in the database. Let us load the coordinates,
+atom names and so on from the molecule into some variables and print
+the information out:
 
 <pre>
 >>> xyz = db["alpha_atom_xyz"].reshape(-1,3)  # give us a 3xn array
@@ -99,10 +109,13 @@ ATOM 1 CA [  3.6329999   15.08199978  31.40999985] 1.0 0.0
 ATOM 2 C [  3.17600012  15.45100021  30.01399994] 1.0 0.0
 ATOM 3 O [  1.99600005  15.31999969  29.62999916] 1.0 0.0
 </pre>
-... and so on, you get the idea. Of course this is only half-way 
-towards PDB output. We need the residue names and types, and we need 
-to know where each residue starts and ends in the list of atoms. The last
-bit of information can be found in the _residue_pointers datablock.
+
+... and so on, you get the idea. Of course this is only half-way
+towards PDB output. We need the residue names and types, and we need
+to know where each residue starts and ends in the list of atoms. The
+last bit of information can be found in the _residue_pointers
+datablock.  We also need to format the line correctly, which is
+straighforward Python.
 
 <pre>
 >>> resnam= db["alpha_residue_name"]
@@ -112,12 +125,13 @@ bit of information can be found in the _residue_pointers datablock.
 
 The rest is left as an exercise for the reader.
 
-<h3>Download</h3>
+<h3>Download and installation</h3>
 
+<a name="download"></a>
 You can download the OdbParser module 
 <a href="ftp://ftp.bioxray.dk/mok/src/OdbParser-1.0.tar.gz"><b>HERE</b></a> or
 you can get an RPM from 
-<a href="http://apt.bioxray.dk">MOKs RPMs</a>.
+<a href="http://apt.bioxray.dk"><b>MOKs RPMs</b></a> (xray component).
 If you choose to compile it yourself, you need to unpack the .tar.gz,
 move into the directory and go
 
@@ -125,8 +139,21 @@ move into the directory and go
 python setup.py build
 python setup.py install
 </pre>
+Of course you need to be root to install into <code>/usr/lib/</code>.
 
+<p>
+If you subscribe to MOKs RPMs, you simply need to do:
+</p>
+<pre>
+apt-get install python-odbparser
+</pre>
+or, if you prefer YUM:
+<pre>
+yum install python-odbparser
+</pre>
+
+<h3>License</h3>
+<a name="license"></a>
 The source files of OdbParser are distributed under the GNU Public License.
 
 <!-- --> 
-
