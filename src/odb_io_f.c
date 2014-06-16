@@ -16,9 +16,7 @@
 /* Get a word from a stream.  Maximum word size is MAXWORD
  * characters. If a word reaches it's maximum limit, we choose not to
  * flush the rest of the word. Returns NULL on EOF.  */
-char *
-getword(fp)
-     FILE *fp;
+static char * getword(FILE *fp)
 {
   static char word[MAXWORD + 1];
   char *p = word;
@@ -149,7 +147,7 @@ int read_float4_f (FILE *fp, float *array, int size)
 */
 #define RSIZ 256
 
-char *parse_format(char *fmt)
+static char *parse_format(char *fmt)
 {
   register int i;
   char *result, *f, *r, *t;

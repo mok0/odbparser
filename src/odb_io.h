@@ -1,5 +1,5 @@
-/* $Id: odb_io.h 7 2006-09-09 13:33:21Z mok $ 
-   Copyright (C) Morten Kjeldgaard 2001-2006.
+/* 
+   Copyright (C) Morten Kjeldgaard 2001-2006, 2014.
    License: GPL
 */
 
@@ -7,9 +7,9 @@
 #define NOSWAP 0
 
 #ifdef __i386__
-#  define DOSWAP SWAP
+#  define DOSWAP 1
 #else
-#  define DOSWAP NOSWAP
+#  define DOSWAP 0
 #endif
 
 /* Declaration of binary read functions */

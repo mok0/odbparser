@@ -1,24 +1,13 @@
 /* 
-   $Id: odbparsermodule.c 7 2006-09-09 13:33:21Z mok $ 
-
    Python module to read O data files, binary or formatted. 
    Morten Kjeldgaard, 03-Jan-2001.
-   Copyright (C) Morten Kjeldgaard 2001-2006.
+   Copyright (C) Morten Kjeldgaard 2001-2006, 2014.
    Licence: GPL.
 */
 
-
-/*
-
-  XXX: Is it necessary to use INCREF when a new object is created?????
-
-*/
-
-#include "Python.h"             /* Python header files */
-#include "arrayobject.h"
-
-//#include <stdio.h>
-//#include <stdlib.h>
+#include <Python.h>             /* Python header files */
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#include <arrayobject.h>
 #include <fcntl.h>
 #include "odb_io.h"
 
@@ -47,17 +36,19 @@ static int binfil(char *fnam)
 }
 
 /*
-  Read a binary O database. The data is returned in a Python dictionary, with
-  datablock names as keys. Real and integer data are stored in numpy arrays.
-  Type 'C' datablocks are in O character strings of length 6. These are returned
-  as a tuple of strings. Type 'T' datavblocks are returned as a tuple of strings.
-  Trailing spaces are stripped from both type 'C' and 'T' datablocks.
+  Read a binary O database. The data is returned in a Python
+  dictionary, with datablock names as keys. Real and integer data are
+  stored in numpy arrays.  Type 'C' datablocks are in O character
+  strings of length 6. These are returned as a tuple of strings. Type
+  'T' datavblocks are returned as a tuple of strings.  Trailing spaces
+  are stripped from both type 'C' and 'T' datablocks.
  */
 static PyObject *readbinary (char *fnam)
 {
   int fd;
   char par[26], typ, *s;
-  int errcod, siz, dims[1];
+  int errcod, siz;
+  npy_intp dims[] = {0};
   void *vector, *data;
   PyObject *pydict, *pykey, *pytup, *pystr;
 
@@ -68,7 +59,6 @@ static PyObject *readbinary (char *fnam)
 
   memset (par, 0, 26);
   pydict = PyDict_New();
-  // XXX Py_INCREF(pydict);
 
   errcod = read_param(fd, par, &typ, &siz, DOSWAP);
   while (!errcod) {
@@ -78,8 +68,7 @@ static PyObject *readbinary (char *fnam)
     while (*s <= 32 && s > par)
       *s-- = '\0';
 
-    pykey = PyString_FromString(par);
-    // XXX Py_INCREF(pykey);
+    pykey = PyUnicode_FromString(par);
 
     switch(typ) {
 
@@ -87,7 +76,8 @@ static PyObject *readbinary (char *fnam)
       data = calloc(siz, sizeof(int));
       read_int4 (fd, data, siz, DOSWAP);
       dims[0] = siz;
-      vector = (void *)PyArray_FromDimsAndData(1, dims, PyArray_INT, (char *)data);
+      // vector = (void *)PyArray_FromDimsAndData(1, dims, PyArray_INT, (char *)data);(npy_intp
+      vector = (void *)PyArray_SimpleNewFromData(1, dims, NPY_INT, data);
       if (!vector) {
 	close(fd);
 	PyErr_SetString(PyExc_RuntimeError, "Failed to create integer array");
@@ -101,7 +91,7 @@ static PyObject *readbinary (char *fnam)
       data = calloc(siz, sizeof(float));
       read_float4 (fd, data, siz, DOSWAP);
       dims[0] = siz;
-      vector = (void *)PyArray_FromDimsAndData(1, dims, PyArray_FLOAT, (char *)data);
+      vector = (void *)PyArray_SimpleNewFromData(1, dims, NPY_FLOAT, data);
       if (!vector) {
 	close(fd);
 	PyErr_SetString(PyExc_RuntimeError, "Failed to create real array");
@@ -126,7 +116,7 @@ static PyObject *readbinary (char *fnam)
 	  ch = &buf[6];
 	  while (*ch <= 32 && ch > buf)
 	    *ch-- = '\0';
-	  pystr = PyString_FromString(buf);
+	  pystr = PyUnicode_FromString(buf);
 	  if (PyTuple_SetItem (pytup, i, pystr) != 0)
 	    fprintf (stderr, "tuple insert error");
 	}
@@ -161,7 +151,7 @@ static PyObject *readbinary (char *fnam)
 	    while (*ch <= 32 && ch > t) // strip spaces off end 
 	      *ch-- = '\0';
 
-	    pystr = PyString_FromString(t); // create python string
+	    pystr = PyUnicode_FromString(t); // create python string
 	    if (PyTuple_SetItem (pytup, nrec++, pystr) != 0) // add it to the tuple
 	      fprintf (stderr, "tuple insert error");
 	    j=0;
@@ -184,20 +174,21 @@ static PyObject *readbinary (char *fnam)
   return pydict;
 }
 
-/* Read a formatted O datablock file. The current algorithm for
- reading formatted type 'C' datablocks requires that there are
- characters other than spaces in every element. This is in fact not
- always the case, for example the .major_menu datablock in menu.o has
- empty elements, which are filled with spaces by the Fortran FORMAT
- statement. It would require a lot of programming to deal with this
- issue, and it is frankly not important enough.
+/* 
+   Read a formatted O datablock file. The current algorithm for
+   reading formatted type 'C' datablocks requires that there are
+   characters other than spaces in every element. This is in fact not
+   always the case, for example the .major_menu datablock in menu.o
+   has empty elements, which are filled with spaces by the Fortran
+   FORMAT statement. It would require a lot of programming to deal
+   with this issue, and it is frankly not important enough.  
 */
-
 static PyObject *readformatted (char *fnam)
 {
   FILE *fp;
   char par[26], typ, fmt[64];
-  int errcod, siz, dims[1];
+  int errcod, siz;
+  npy_intp dims[] = {0};
   void *vector, *data;
   PyObject *pydict, *pykey, *pytup, *pystr;
 
@@ -207,12 +198,11 @@ static PyObject *readformatted (char *fnam)
   }
 
   pydict = PyDict_New();
-  // XXX Py_INCREF(pydict);
 
   errcod = read_param_f(fp, par, &typ, &siz, fmt);
   while (!errcod) {
 
-    pykey = PyString_FromString(par);
+    pykey = PyUnicode_FromString(par);
 
     switch (toupper(typ)) {
 
@@ -220,7 +210,7 @@ static PyObject *readformatted (char *fnam)
       data = calloc(siz, sizeof(int));
       read_int4_f (fp, data, siz);
       dims[0] = siz;
-      vector = (void *)PyArray_FromDimsAndData(1, dims, PyArray_INT, (char *)data);
+      vector = (void *)PyArray_SimpleNewFromData(1, dims, NPY_INT, data);
       if (!vector) {
 	fclose(fp);
 	PyErr_SetString(PyExc_RuntimeError, "Failed to create integer array");
@@ -233,9 +223,9 @@ static PyObject *readformatted (char *fnam)
 
     case 'R':
       data = calloc(siz, sizeof(float));
-      read_float4_f (fp, data, siz, DOSWAP);
+      read_float4_f (fp, data, siz);
       dims[0] = siz;
-      vector = (void *)PyArray_FromDimsAndData(1, dims, PyArray_FLOAT, (char *)data);
+      vector = (void *)PyArray_SimpleNewFromData(1, dims, NPY_FLOAT, data);
       if (!vector) {
 	fclose(fp);
 	PyErr_SetString(PyExc_RuntimeError, "Failed to create real array");
@@ -262,7 +252,7 @@ static PyObject *readformatted (char *fnam)
 	  while (*ch <= 32 && ch > buf)
 	    *ch-- = '\0';
 
-	  pystr = PyString_FromString(buf);
+	  pystr = PyUnicode_FromString(buf);
 	  if (PyTuple_SetItem (pytup, i, pystr) != 0)
 	    fprintf (stderr, "tuple insert error");
 	}
@@ -293,7 +283,7 @@ static PyObject *readformatted (char *fnam)
 	 
 	  //fprintf (stderr, "STRING:%s<<<\n", t);
 
-	  pystr = PyString_FromString(t); // create python string
+	  pystr = PyUnicode_FromString(t); // create python string
 	  if (PyTuple_SetItem (pytup, i, pystr) != 0) // add it to the tuple
 	    fprintf (stderr, "tuple insert error");
 	  j += reclen;
@@ -355,19 +345,30 @@ static PyMethodDef odbparser_methods[] = {
 
 /* 4. Module initialization function */
 
+static struct PyModuleDef moduledef = {
+  PyModuleDef_HEAD_INIT,
+  "odbparser",             /* name of module */
+  odbparser_module__doc__, /* module documentation */
+  -1,                      /* m_size */
+  odbparser_methods,       /* methods */
+  NULL,                    /* m_reload */
+  NULL,                    /* m_traverse */
+  NULL,                    /* m_clear */
+  NULL                     /* m_free */
+};
+
+
 static PyObject *ErrorObject;
 
-void initodbparser() {
+PyMODINIT_FUNC PyInit_odbparser(void) {
   PyObject *m, *d;
 
   /* Create the module and add the functions */
-  m = Py_InitModule4("odbparser", odbparser_methods,
-                     odbparser_module__doc__,
-                     (PyObject*)NULL,PYTHON_API_VERSION);
+  m = PyModule_Create(&moduledef);
 
   /* Add some symbolic constants to the module */
   d = PyModule_GetDict(m);
-  ErrorObject = PyString_FromString("odbparser.error");
+  ErrorObject = PyUnicode_FromString("odbparser.error");
   PyDict_SetItemString(d, "error", ErrorObject);
 
   import_array();
@@ -375,6 +376,8 @@ void initodbparser() {
   /* Check for errors */
   if (PyErr_Occurred())
     Py_FatalError("can't initialize module odbparser");
+
+  return m;
 }
 
 
