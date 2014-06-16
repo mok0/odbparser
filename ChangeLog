@@ -1,0 +1,4 @@
+2014-06-16  Morten Kjeldgaard  <mok@homunculus.local>
+
+	* Fix compilation errors, add declarations in odb_io.h.
+	* src/odbparsermodule.c: Ported to Python 3 API,
