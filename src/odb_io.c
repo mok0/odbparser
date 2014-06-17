@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <inttypes.h> // define int32_t
 #include "odb_io.h"
 
 /*
@@ -26,7 +27,7 @@ swap4 (char *buffer, int n)
     buffer[i+3] = j;
     j = buffer[i+1];
     buffer[i+1] = buffer[i+2];
-    buffer[i+2] =j; 
+    buffer[i+2] =j;
   }
 }
 
@@ -36,7 +37,7 @@ swap4 (char *buffer, int n)
 int read_param (int fd, char *par, char *partyp, int *size, int swap)
 {
   int n;
-  long rl1, rl2;
+  int32_t  rl1, rl2;
 
   n = read (fd, &rl1, 4);
   if (n == 0) return -1;
@@ -50,9 +51,9 @@ int read_param (int fd, char *par, char *partyp, int *size, int swap)
   if (swap) swap4 ((char *)size, 1);
   n = read (fd, &rl2, 4);
   if (swap) swap4 ((char *)&rl2, 1);
-  
+
   if (rl1 != rl2) {
-    fprintf (stderr, "Error reading parameter header (%d %ld %ld)\n", 
+    fprintf (stderr, "Error reading parameter header (%d %d %d)\n",
 	     *size, rl1, rl2);
     return -2;
   }
@@ -65,13 +66,13 @@ int read_param (int fd, char *par, char *partyp, int *size, int swap)
 int read_text (int fd, char *text, int size, int swap)
 {
   int n;
-  long rl1, rl2;
+  int32_t rl1, rl2;
 
-  n = read (fd, &rl1, 4);  
+  n = read (fd, &rl1, 4);
   if (n == 0) return -1;
   if (swap) swap4 ((char *)&rl1, 1);
   n = read (fd, text, rl1);
-  n = read (fd, &rl2, 4);  
+  n = read (fd, &rl2, 4);
   if (swap) swap4 ((char *)&rl2, 1);
 
   if (rl1 != rl2) {
@@ -79,78 +80,78 @@ int read_text (int fd, char *text, int size, int swap)
     return -2;
   }
   if (size != rl2)
-    fprintf (stderr, "read_text: Expected %d, got %ld elements\n", size, rl2);
+    fprintf (stderr, "read_text: Expected %d, got %d elements\n", size, rl2);
 
   return 0;
 }
 
-/* 
+/*
    Read 'size' C6 variables from the binary fortran file.
 */
 int read_c6 (int fd, char *cstore, int size, int swap)
 {
   int n;
-  long rl1, rl2;
+  int32_t rl1, rl2;
 
-  n = read (fd, &rl1, 4);  
+  n = read (fd, &rl1, 4);
   if (n == 0) return -1;
   if (swap) swap4 ((char *)&rl1, 1);
   n = read (fd, cstore, rl1);
-  n = read (fd, &rl2, 4);  
+  n = read (fd, &rl2, 4);
   if (swap) swap4 ((char *)&rl2, 1);
 
   if (rl1 != rl2) {
     fprintf (stderr, "Error read character block\n");
     return -2;
   }
-  if (6*size != rl2) 
-    fprintf (stderr, "read_c6: Expected %d, got %ld elements\n", 6*size, rl2);
+  if (6*size != rl2)
+    fprintf (stderr, "read_c6: Expected %d, got %d elements\n", 6*size, rl2);
 
   return 0;
 }
 
 /*
   Read 'size' integers from the binary fortran file.  Swap bytes if
-  necessary, file is always in big-endian order.  
+  necessary, file is always in big-endian order.
 */
 int read_int4 (int fd, int *istore, int size, int swap)
 {
   int n;
-  long rl1, rl2;
+  int32_t rl1, rl2;
 
-  n = read (fd, &rl1, 4);  
+  n = read (fd, &rl1, 4);
   if (n == 0) return -1;
   if (swap) swap4 ((char *)&rl1, 1);
   n = read (fd, istore, rl1);
   if (swap) swap4 ((char *)istore, size);
-  n = read (fd, &rl2, 4);  
+  n = read (fd, &rl2, 4);
   if (swap) swap4 ((char *)&rl2, 1);
 
   if (rl1 != rl2) {
     fprintf (stderr, "Error read int block\n");
     return -2;
   }
-  if (4*size != rl2) 
-    fprintf (stderr, "read_int4: Expected %d, got %ld elements\n", 4*size, rl2);
+  if (4*size != rl2)
+    fprintf (stderr, "read_int4: Expected %d, got %d elements\n", 4*size, rl2);
 
   return 0;
 }
 
-/* 
+/*
    Read 'size' floats from the binary fortran file.  Swap bytes if
-   necessary, file is always in big-endian order. 
+   necessary, file is always in big-endian order.
 */
 int read_float4 (int fd, float *rstore, int size, int swap)
 {
   int n;
-  long rl1, rl2;
+  int32_t rl1, rl2;
 
-  n = read (fd, &rl1, 4);  
+  n = read (fd, &rl1, 4);
   if (n == 0) return -1;
   if (swap) swap4 ((char *)&rl1, 1);
   n = read (fd, rstore, rl1);
   if (swap) swap4 ((char *)rstore, size);
-  n = read (fd, &rl2, 4);  
+  n = read (fd, &rl2, 4);
   if (swap) swap4 ((char *)&rl2, 1);
 
   if (rl1 != rl2) {
@@ -158,13 +159,13 @@ int read_float4 (int fd, float *rstore, int size, int swap)
     return -2;
   }
   if (4*size != rl2)
-    fprintf (stderr, "read_float4: Expected %d, got %ld elements\n", 4*size, rl2);
+    fprintf (stderr, "read_float4: Expected %d, got %d elements\n", 4*size, rl2);
 
   return 0;
 }
 
 /*
-Local Variables: 
+Local Variables:
 mode: c
 mode: font-lock
 End:
