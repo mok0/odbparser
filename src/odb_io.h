@@ -3,10 +3,7 @@
    License: GPL
 */
 
-#define SWAP 1
-#define NOSWAP 0
-
-#ifdef __i386__
+#if defined(MIPSEL) || defined(__i386__) || defined(__x86_64__) || defined(WIN32)
 #  define DOSWAP 1
 #else
 #  define DOSWAP 0
