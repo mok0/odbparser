@@ -1,4 +1,4 @@
-== OdbParser -- a Python extension module to read O files ==
+## OdbParser -- a Python extension module to read O files ##
 
 Odbparser is a module for the Python programmer who would like to
 extract information from O files.
@@ -12,7 +12,6 @@ binary file as written by O when it exits:
 ```python
 >>> import odbparser
 >>> db = odbparser.get("binary.o")
-Reading binary O file
 ```
 
 Now, after reading the file, db is an ordinary Python dictionary, the
@@ -34,7 +33,7 @@ well-known O datablocks:
 ```
 
 We see that the type of the .gs_real array is a
-[numpy](http://numpy.scipy.org/) array, and we can print the array to
+[**numpy**](http://numpy.scipy.org/) array, and we can print the array to
 see that it contains 28 floating point numbers with all kinds of
 viewing information used by O. We can extract the orientation matrix:
 
@@ -49,7 +48,7 @@ viewing information used by O. We can extract the orientation matrix:
  [ -2.66888547  14.67584229  -1.42084014   1.        ]]
 ```
 
-Now 'mat' contains the OpenGL 4x4 orientation matrix in column major
+Now `mat` contains the OpenGL 4x4 orientation matrix in column major
 format.  For most uses, the orientation part (upper 3x3) needs to be
 transposed:
 
@@ -133,6 +132,6 @@ The above installs the module in the user space (usually in
 the `~/.local` tree).  Of course you need to be root to
 install into `/usr/lib/`.
 
-=== License ===
+### License ###
 <a name="license"></a>
 The source files of odbparser are distributed under the GNU Public License.
