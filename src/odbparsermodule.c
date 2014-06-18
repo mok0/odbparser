@@ -1,5 +1,5 @@
-/* 
-   Python module to read O data files, binary or formatted. 
+/*
+   Python module to read O data files, binary or formatted.
    Morten Kjeldgaard, 03-Jan-2001.
    Copyright (C) Morten Kjeldgaard 2001-2006, 2014.
    Licence: GPL.
@@ -22,17 +22,17 @@ static int binfil(char *fnam)
   char buf[8];
 
   fd = open(fnam, O_RDONLY);
-  if (fd > -1) { 
+  if (fd > -1) {
     n = read (fd, buf, 8);
     close(fd);
-    if ((buf[0]&buf[1]&buf[2]) == 0 && buf[3] == 30 && buf[4] == '.') 
+    if ((buf[0]&buf[1]&buf[2]) == 0 && buf[3] == 30 && buf[4] == '.')
       return 2;
-    if ((buf[0]&buf[1]&buf[2]) == 0 && buf[3] == 30) 
+    if ((buf[0]&buf[1]&buf[2]) == 0 && buf[3] == 30)
       /* The only binary O files that do not have a '.' in the fifth byte
 	 are the dgnl data files. */
       return 1;
   }
-   return 0;  
+   return 0;
 }
 
 /*
@@ -60,8 +60,12 @@ static PyObject *readbinary (char *fnam)
   memset (par, 0, 26);
   pydict = PyDict_New();
 
-  errcod = read_param(fd, par, &typ, &siz, DOSWAP);
-  while (!errcod) {
+  while (1) {
+
+    errcod = read_param(fd, par, &typ, &siz, DOSWAP);
+    if (errcod < 0 || siz == 0)
+      break;
+    //printf ("errcod=%d, param=%s type=%c size=%d\n", errcod, par, typ, siz);
 
     /* strip spaces off end of datablock name */
     s = &par[25];
@@ -76,7 +80,6 @@ static PyObject *readbinary (char *fnam)
       data = calloc(siz, sizeof(int));
       read_int4 (fd, data, siz, DOSWAP);
       dims[0] = siz;
-      // vector = (void *)PyArray_FromDimsAndData(1, dims, PyArray_INT, (char *)data);(npy_intp
       vector = (void *)PyArray_SimpleNewFromData(1, dims, NPY_INT, data);
       if (!vector) {
 	close(fd);
@@ -100,13 +103,13 @@ static PyObject *readbinary (char *fnam)
       }
       PyDict_SetItem (pydict, pykey, (PyObject *)vector); // add to dictionary
       break;
-      
+
     case 'C':
       {
 	register int i;
 	char buf[7], *ch;
 	buf[6] = 0;
-	s = calloc (siz,6*sizeof(char));  
+	s = calloc (siz,6*sizeof(char));
 	read_c6 (fd, s, siz, DOSWAP);
 	pytup = PyTuple_New (siz);
 	for (i=0; i < siz; i++) {
@@ -116,7 +119,13 @@ static PyObject *readbinary (char *fnam)
 	  ch = &buf[6];
 	  while (*ch <= 32 && ch > buf)
 	    *ch-- = '\0';
-	  pystr = PyUnicode_FromString(buf);
+	  /*
+	     In principle we should use:
+	     pystr = PyBytes_FromString(buf);
+	     but it appears there are non-ascii bytes in some of
+	     the character blocks in the distributed O data files.
+	  */
+	  pystr = PyBytes_FromString(buf);
 	  if (PyTuple_SetItem (pytup, i, pystr) != 0)
 	    fprintf (stderr, "tuple insert error");
 	}
@@ -139,19 +148,19 @@ static PyObject *readbinary (char *fnam)
 	  if (s[i] == '\r')
 	    nrec++;
 	}
-	//printf ("\nPAR = %s\t(%d)\n", par, nrec);
 	pytup = PyTuple_New (nrec);
-	
+
 	nrec = 0;
 	for (i=0,j=0; i<siz; i++) { // extract the individual strings into 't'
 	  t[j] = s[i];
 
-	  if (t[j] == '\r') {	
+	  if (t[j] == '\r') {
 	    ch = &t[j];
-	    while (*ch <= 32 && ch > t) // strip spaces off end 
+	    while (*ch <= 32 && ch > t) // strip spaces off end
 	      *ch-- = '\0';
 
 	    pystr = PyUnicode_FromString(t); // create python string
+	    //pystr = PyBytes_FromString(t); // create python string
 	    if (PyTuple_SetItem (pytup, nrec++, pystr) != 0) // add it to the tuple
 	      fprintf (stderr, "tuple insert error");
 	    j=0;
@@ -163,25 +172,23 @@ static PyObject *readbinary (char *fnam)
 	free(s);
 	PyDict_SetItem (pydict, pykey, pytup); // add tuple to dictionary
       }
-      
+
       break;
 
     } // end switch (typ)
- 
-    errcod = read_param(fd, par, &typ, &siz, DOSWAP);	  // read next param block
   }
   close(fd);
   return pydict;
 }
 
-/* 
+/*
    Read a formatted O datablock file. The current algorithm for
    reading formatted type 'C' datablocks requires that there are
    characters other than spaces in every element. This is in fact not
    always the case, for example the .major_menu datablock in menu.o
    has empty elements, which are filled with spaces by the Fortran
    FORMAT statement. It would require a lot of programming to deal
-   with this issue, and it is frankly not important enough.  
+   with this issue, and it is frankly not important enough.
 */
 static PyObject *readformatted (char *fnam)
 {
@@ -241,7 +248,7 @@ static PyObject *readformatted (char *fnam)
 	register int i;
 	char buf[7], *ch, *s;
 	buf[6] = 0;
-	s = calloc (siz,6*sizeof(char));  
+	s = calloc (siz,6*sizeof(char));
 	read_c6_f (fp, s, siz, fmt);
 	pytup = PyTuple_New (siz);
 	for (i=0; i < siz; i++) {
@@ -274,15 +281,12 @@ static PyObject *readformatted (char *fnam)
 	read_text_f (fp, s, nrec, reclen);
 
 	pytup = PyTuple_New (nrec);
-	
+
 	for (i=0, j=0; i<nrec; i++) { // extract the individual strings into 't'
 	  memcpy (t, s+j, reclen);
 	  ch = &t[reclen-1];
-	  while (*ch <= 32 && ch > t) // strip spaces off end 
+	  while (*ch <= 32 && ch > t) // strip spaces off end
 	    *ch-- = '\0';
-	 
-	  //fprintf (stderr, "STRING:%s<<<\n", t);
-
 	  pystr = PyUnicode_FromString(t); // create python string
 	  if (PyTuple_SetItem (pytup, i, pystr) != 0) // add it to the tuple
 	    fprintf (stderr, "tuple insert error");
@@ -303,7 +307,7 @@ static PyObject *readformatted (char *fnam)
 
 
 /* 1. Functions available in odbparser module */
- 
+
 static PyObject *get (PyObject *self, PyObject *args)
 {
   char *fnam;
@@ -316,24 +320,24 @@ static PyObject *get (PyObject *self, PyObject *args)
      both return a Python dictionary. */
 
   if (binfil(fnam)) {
-    fprintf (stderr, "Reading binary O file\n");
+    //fprintf (stderr, "Reading binary O file\n");
     pydict = readbinary(fnam);
   }  else {
-    fprintf (stderr, "Reading formatted O file\n");
+    //fprintf (stderr, "Reading formatted O file\n");
     pydict = readformatted(fnam);
   }
   return pydict;
 }
 
 
-/* 2. Doc strings */ 
+/* 2. Doc strings */
 
 static char odbparser_module__doc__[] =
 "Parse O binary and formatted files";
- 
+
 static char odbparser_get__doc__[] =
 "get(filename) -- return dictionary of O datablocks";
- 
+
 
 /* 3. Method table mapping names to wrappers */
 

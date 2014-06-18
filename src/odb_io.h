@@ -24,8 +24,8 @@ int read_c6_f (FILE *fp, char *array, int size, char *fmt);
 int read_text_f (FILE *fp, char *array, int nrec, int size);
 
 /*
-Local Variables: 
-mode: c
-mode: font-lock
-End:
+  Local Variables: 
+  mode: c
+  mode: font-lock
+  End:
 */

@@ -1,7 +1,7 @@
 /*
    Routines to read from binary O files.
    Morten Kjeldgaard, 03-Jan-2001.
-   Copyright (C) Morten Kjeldgaard 2001-2014.
+   Copyright (C) Morten Kjeldgaard 2001-2006, 2014.
    Licence: GPL.
 */
 
@@ -165,9 +165,8 @@ int read_float4 (int fd, float *rstore, int size, int swap)
 }
 
 /*
-Local Variables:
-mode: c
-mode: font-lock
-End:
+  Local Variables:
+  mode: c
+  mode: font-lock
+  End:
 */
-

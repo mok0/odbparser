@@ -1,8 +1,7 @@
-/* $Id: odb_io_f.c 7 2006-09-09 13:33:21Z mok $ 
-
+/*
    Routines to read from formatted O files.
    Morten Kjeldgaard, 03-Jan-2001.
-   Copyright (C) Morten Kjeldgaard 2001-2006.
+   Copyright (C) Morten Kjeldgaard 2001-2006, 2014.
    Licence: GPL.
 */
 
@@ -40,7 +39,7 @@ static char * getword(FILE *fp)
 
 /*
   Read the header of a formatted O file. Reads past any comments and
-  blank lines 
+  blank lines
 */
 int read_param_f (FILE *fp, char *par, char *partyp, int *size, char *fmt)
 {
@@ -60,7 +59,7 @@ int read_param_f (FILE *fp, char *par, char *partyp, int *size, char *fmt)
   }
 
   // Decode datablock name and convert to lower case
-  memcpy (par, ch, 26); 
+  memcpy (par, ch, 26);
   ch = par;
   while (*ch) {
     *ch = tolower(*ch);
@@ -77,23 +76,23 @@ int read_param_f (FILE *fp, char *par, char *partyp, int *size, char *fmt)
   ch = strtok(NULL, " ");
   if (!ch)
     return 2;
-  *size = (int)strtol(ch, &stat, 10); 
+  *size = (int)strtol(ch, &stat, 10);
   if (*stat) {
     fprintf (stderr, "non-digits in datablock size\n");
-    return 3; 
+    return 3;
   }
 
-  // Finally, decode the format. 
+  // Finally, decode the format.
   ch = strtok(NULL, " \012");
   if (!fmt)
     return 4;
-  memcpy (fmt, ch, 64); 
+  memcpy (fmt, ch, 64);
 
   return 0;
 }
 
 /*
-  Read 'size' integers from the file 
+  Read 'size' integers from the file
 */
 
 int read_int4_f (FILE *fp, int *array, int size)
@@ -103,18 +102,18 @@ int read_int4_f (FILE *fp, int *array, int size)
 
   for (i=0; i<size; i++) {
     ch = getword(fp);
-    array[i] = (int)strtol(ch, &stat, 10); 
+    array[i] = (int)strtol(ch, &stat, 10);
     if (*stat) {
       fprintf (stderr, "non-digits in datablock\n");
 
-      return 1; 
+      return 1;
     }
   }
   return 0;
 }
 
 /*
-  Read 'size' floats from the file 
+  Read 'size' floats from the file
 */
 int read_float4_f (FILE *fp, float *array, int size)
 {
@@ -126,7 +125,7 @@ int read_float4_f (FILE *fp, float *array, int size)
     array[i] = (float)strtod(ch, &stat);
     if (*stat) {
       fprintf (stderr, "non-digits in datablock\n");
-      return 1; 
+      return 1;
     }
   }
   return 0;
@@ -135,7 +134,7 @@ int read_float4_f (FILE *fp, float *array, int size)
 /*
   A simple parser for the fortran formats that the type C datablocks
   are stored in. Generate a string describing the format, so the
-  program knows what to expect in the file. The function knows that 
+  program knows what to expect in the file. The function knows that
   type C variables are 6 bytes always. Examples:
 
   (2a)         -> 123456123456
@@ -156,10 +155,10 @@ static char *parse_format(char *fmt)
   //printf ("allocating %d bytes\n",RSIZ);
   result = malloc(RSIZ);
   memset (result, 0, RSIZ);
-  
+
   f = fmt;
   r = result;
-  
+
   while (*f) {
     switch (*f) {
     case '(':
@@ -219,7 +218,7 @@ static char *parse_format(char *fmt)
 }
 
 /*
-  Read 'size' C6 variables from the file 
+  Read 'size' C6 variables from the file
 */
 int read_c6_f (FILE *fp, char *array, int size, char *fmt)
 {
@@ -230,7 +229,7 @@ int read_c6_f (FILE *fp, char *array, int size, char *fmt)
   t = parse_format(fmt);
   s = t;
   a = array;
-  
+
   i = 0;
   eol = 0;
   while (i < size) {
@@ -242,7 +241,7 @@ int read_c6_f (FILE *fp, char *array, int size, char *fmt)
       while (fgetc(fp) != '\n')
 	;
       //fprintf (stderr, "rewind\n");
-    }	      
+    }
 
     inword = 1;
     while (inword) {
@@ -299,9 +298,9 @@ int read_text_f (FILE *fp, char *array, int nrec, int size)
 }
 
 /*
-Local Variables: 
-mode: c
-mode: font-lock
-End:
+  Local Variables:
+  mode: c
+  mode: font-lock
+  End:
 */
 
